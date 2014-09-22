@@ -2,16 +2,22 @@ package com.abc
 
 import scala.collection.mutable.ListBuffer
 
-class Customer(val name: String, var accounts: ListBuffer[Account] = ListBuffer()) {
+trait CustomerVisitor {
+  def visit(customer:Customer)
+  def visit(account:Account)
+}
 
+class Customer(val name: String, private val _accounts: ListBuffer[Account] = ListBuffer()) {
+
+  def accounts:Iterable[Account]=_accounts
   def openAccount(account: Account): Customer = {
-    accounts += account
+    _accounts += account
     this
   }
 
-  def numberOfAccounts: Int = accounts.size
+  def numberOfAccounts: Int = _accounts.size
 
-  def totalInterestEarned: Double = accounts.map(_.interestEarned).sum
+  def totalInterestEarned: Double = _accounts.map(_.interestEarned).sum
 
   /**
    * This method gets a statement
@@ -20,9 +26,9 @@ class Customer(val name: String, var accounts: ListBuffer[Account] = ListBuffer(
     //JIRA-123 Change by Joe Bloggs 29/7/1988 start
     var statement: String = null //reset statement to null here
     //JIRA-123 Change by Joe Bloggs 29/7/1988 end
-    val totalAcrossAllAccounts = accounts.map(_.sumTransactions()).sum
+    val totalAcrossAllAccounts = _accounts.map(_.sumTransactions()).sum
     statement = f"Statement for $name\n" +
-      accounts.map(statementForAccount).mkString("\n", "\n\n", "\n") +
+      _accounts.map(statementForAccount).mkString("\n", "\n\n", "\n") +
       s"\nTotal In All Accounts ${toDollars(totalAcrossAllAccounts)}"
     statement
   }
@@ -50,5 +56,10 @@ class Customer(val name: String, var accounts: ListBuffer[Account] = ListBuffer(
     }
 
   private def toDollars(number: Double): String = f"$$$number%.2f"
+
+  def accept(c:CustomerVisitor):Unit={
+    c.visit(this)
+    accounts.foreach(a=>c.visit(a))
+  }
 }
 
