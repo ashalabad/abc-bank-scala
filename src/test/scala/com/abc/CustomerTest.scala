@@ -3,7 +3,7 @@ package com.abc
 import org.scalatest.{Matchers, FlatSpec}
 
 class CustomerTest extends FlatSpec with Matchers {
-  "Customer" should "statement" in {
+  "Customer" should "generate the statement" in {
     val checkingAccount: Account =Account.CHECKING
     val savingsAccount: Account = Account.SAVINGS
     val henry: Customer = new Customer("Henry").openAccount(checkingAccount).openAccount(savingsAccount)
@@ -27,9 +27,31 @@ class CustomerTest extends FlatSpec with Matchers {
     oscar.numberOfAccounts should be(2)
   }
 
-  ignore should "testThreeAcounts" in {
+  it should "testThreeAccounts" in {
+    val oscar: Customer = new Customer("Oscar").openAccount(Account.SAVINGS)
+    oscar.openAccount(Account.CHECKING).openAccount(Account.MAXI_SAVINGS)
+    oscar.numberOfAccounts should be(3)
+  }
+
+  it should "allow transfer between accounts" in {
     val oscar: Customer = new Customer("Oscar").openAccount(Account.SAVINGS)
     oscar.openAccount(Account.CHECKING)
-    oscar.numberOfAccounts should be(3)
+    oscar.numberOfAccounts should be(2)
+    oscar.accounts.head.deposit(100.0)
+    oscar.transfer(oscar.accounts.head,oscar.accounts.tail.head,50.0)
+    oscar.accounts.head.balance should be(50.0)
+    oscar.accounts.tail.head.balance should be(50.0)
+  }
+
+  it should "fail transfer between accounts with insufficient funds" in {
+    val oscar: Customer = new Customer("Oscar").openAccount(Account.SAVINGS)
+    oscar.openAccount(Account.CHECKING)
+    oscar.numberOfAccounts should be(2)
+    oscar.accounts.head.deposit(100.0)
+    withClue("not enough funds") {
+      intercept[IllegalArgumentException] {
+        oscar.transfer(oscar.accounts.head,oscar.accounts.tail.head,200.0)
+      }
+    }
   }
 }

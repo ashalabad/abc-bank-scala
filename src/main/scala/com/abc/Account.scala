@@ -13,6 +13,11 @@ object Account {
   def MAXI_SAVINGS: Account = new Account with MaxiSavingsInterestEarner with MaxiSavingsName with ConcreteDateProvider
 }
 
+/**
+ * Abstract Account class
+ * Account Builder assembles an account with an interest earner,name and transaction date generator
+ * @param _transactions
+ */
 abstract class Account(private val _transactions: ListBuffer[Transaction] = ListBuffer()) {
 
   def name:String

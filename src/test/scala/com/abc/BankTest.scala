@@ -1,5 +1,6 @@
 package com.abc
 
+import org.joda.time.DateTime
 import org.scalatest.{Matchers, FlatSpec}
 
 class BankTest extends FlatSpec with Matchers {
@@ -13,7 +14,13 @@ class BankTest extends FlatSpec with Matchers {
 
   it should "checking account" in {
     val bank: Bank = new Bank
-    val checkingAccount: Account =Account.CHECKING
+    trait MockDateProvider extends AccountDateProvider {
+      this:Account=>
+      def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
+    }
+    val checkingAccount: Account =new Account with CheckingInterestEarner
+      with CheckingName with MockDateProvider
+
     val bill: Customer = new Customer("Bill").openAccount(checkingAccount)
     bank.addCustomer(bill)
     checkingAccount.deposit(100.0)
@@ -22,9 +29,14 @@ class BankTest extends FlatSpec with Matchers {
 
   it should "savings account" in {
     val bank: Bank = new Bank
-    val checkingAccount: Account = Account.SAVINGS
-    bank.addCustomer(new Customer("Bill").openAccount(checkingAccount))
-    checkingAccount.deposit(1500.0)
+    trait MockDateProvider extends AccountDateProvider {
+      this:Account=>
+      def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
+    }
+    val savingsAccount: Account =new Account with SavingsInterestEarner
+      with SavingsName with MockDateProvider
+    bank.addCustomer(new Customer("Bill").openAccount(savingsAccount))
+    savingsAccount.deposit(1500.0)
     bank.totalInterestPaid should be(2.0)
   }
 
