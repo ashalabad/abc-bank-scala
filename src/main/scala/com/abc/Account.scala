@@ -1,46 +1,42 @@
 package com.abc
 
+import org.joda.time.DateTime
+
 import scala.collection.mutable.ListBuffer
 
+/**
+ * Account Builder
+ */
 object Account {
-  final val CHECKING: Int = 0
-  final val SAVINGS: Int = 1
-  final val MAXI_SAVINGS: Int = 2
+  def CHECKING: Account = new Account with CheckingInterestEarner with CheckingName with ConcreteDateProvider
+  def SAVINGS: Account = new Account with SavingsInterestEarner with SavingsName with ConcreteDateProvider
+  def MAXI_SAVINGS: Account = new Account with MaxiSavingsInterestEarner with MaxiSavingsName with ConcreteDateProvider
 }
 
-class Account(val accountType: Int, private val _transactions: ListBuffer[Transaction] = ListBuffer()) {
+abstract class Account(private val _transactions: ListBuffer[Transaction] = ListBuffer()) {
 
-  def transactions:Iterable[Transaction]=_transactions
+  def name:String
+  def transactions:Iterable[Transaction]=_transactions.toIterable
 
-  def deposit(amount: Double) {
+  def deposit(amount: Double):Transaction={
     if (amount <= 0)
       throw new IllegalArgumentException("amount must be greater than zero")
-    _transactions += Transaction(DateProvider.getInstance.now, amount)
+    val trx=Transaction(currentDate, amount)
+    _transactions += trx
+    trx
   }
 
-  def withdraw(amount: Double) {
+  def withdraw(amount: Double):Transaction={
     if (amount <= 0)
       throw new IllegalArgumentException("amount must be greater than zero")
     if(sumTransactions(true)<amount)
       throw new IllegalArgumentException("not enough funds")
-    _transactions += Transaction(DateProvider.getInstance.now,-amount)
+    val trx=Transaction(currentDate,-amount)
+    _transactions += trx
+    trx
   }
-
-  def interestEarned: Double = {
-    val amount: Double = sumTransactions()
-    accountType match {
-      case Account.SAVINGS =>
-        if (amount <= 1000) amount * 0.001
-        else 1 + (amount - 1000) * 0.002
-      case Account.MAXI_SAVINGS =>
-        if (amount <= 1000) return amount * 0.02
-        if (amount <= 2000) return 20 + (amount - 1000) * 0.05
-        70 + (amount - 2000) * 0.1
-      case _ =>
-        amount * 0.001
-    }
-  }
-
+  def balance:Double=sumTransactions(true)
+  protected def currentDate:DateTime
+  def interestEarned: Double
   def sumTransactions(checkAllTransactions: Boolean = true): Double = _transactions.map(_.amount).sum
-
 }

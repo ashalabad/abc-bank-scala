@@ -3,22 +3,22 @@ package com.abc
 import scala.collection.mutable.ListBuffer
 
 class Bank {
-  var customers = new ListBuffer[Customer]
+  import com.abc.ext.Helpers._
+  private val _customers= new ListBuffer[Customer]
+
+  def customers:Iterable[Customer]=_customers.toIterable
 
   def addCustomer(customer: Customer) {
-    customers += customer
+    _customers += customer
   }
 
   def customerSummary: String = {
     var summary: String = "Customer Summary"
     for (customer <- customers)
-      summary = summary + "\n - " + customer.name + " (" + format(customer.numberOfAccounts, "account") + ")"
+      summary = summary + "\n - " + customer.name + " (" + customer.numberOfAccounts.pluralize("account") + ")"
     summary
   }
 
-  private def format(number: Int, word: String): String = {
-    number + " " + (if (number == 1) word else word + "s")
-  }
 
   def totalInterestPaid: Double = {
     var total: Double = 0
@@ -27,15 +27,10 @@ class Bank {
   }
 
   def getFirstCustomer: String = {
-    try {
-      customers = null
-      customers(0).name
-    }
-    catch {
-      case e: Exception => {
-        e.printStackTrace
-        return "Error"
-      }
+    customers match {
+      case x::Nil=>x.name
+      case x::xs=>x.name
+      case Nil=>""
     }
   }
 

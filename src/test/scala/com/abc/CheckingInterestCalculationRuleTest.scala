@@ -1,5 +1,10 @@
 package com.abc
+
+import com.abc.rules.CheckingInterestCalculator
 import org.scalatest.{FlatSpec, Matchers}
+
+import scala.collection.mutable.ListBuffer
+
 /**
  * Created by igor on 9/21/14.
  */
