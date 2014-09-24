@@ -1,6 +1,9 @@
 package com.abc
 
-import org.scalatest.{Matchers, FlatSpec}
+import java.util.Calendar
+
+import org.joda.time.DateTime
+import org.scalatest.{BeforeAndAfterEach, BeforeAndAfter, Matchers, FlatSpec}
 
 import scala.concurrent._
 import scala.concurrent.duration._
@@ -9,9 +12,24 @@ import ExecutionContext.Implicits.global
 /**
  * Created by igor on 9/21/14.
  */
-class AccountTest extends FlatSpec with Matchers {
+class AccountTest extends FlatSpec with Matchers with BeforeAndAfterEach {
 
-  "Account" should "not allowed deposit with negative amount" in {
+  it should "create correct checking account through account builder" in {
+    val acc=Account.CHECKING
+    acc.isInstanceOf[CheckingInterestEarner] should be(true)
+  }
+
+  it should "create correct savings account through account builder" in {
+    val acc=Account.SAVINGS
+    acc.isInstanceOf[SavingsInterestEarner] should be(true)
+  }
+
+  it should "create correct maxi savings account through account builder" in {
+    val acc=Account.MAXI_SAVINGS
+    acc.isInstanceOf[MaxiSavingsInterestEarner] should be(true)
+  }
+
+  it should "not allowed deposit with negative amount" in {
     val acc=Account.CHECKING
     withClue("amount must be greater than zero") {
       intercept[IllegalArgumentException] {
@@ -84,61 +102,7 @@ class AccountTest extends FlatSpec with Matchers {
   }
 
 
-  it should "calculate correct interest for Checking account" in {
-    val acc=Account.CHECKING
-    acc.deposit(1000.0)
-    acc.interestEarned should be(1.0)
-  }
-
-  it should "calculate correct interest for Savings account with the amount < 1000" in {
-    val acc=Account.SAVINGS
-    acc.deposit(100.0)
-    acc.interestEarned should be (0.1)
-  }
-
-  it should "calculate correct interest for Savings account with the amount == 1000" in {
-    val acc=Account.SAVINGS
-    acc.deposit(1000.0)
-    acc.interestEarned should be (1.0)
-  }
-
-  it should "calculate correct interest for Savings account with the amount > 1000" in {
-    val acc=Account.SAVINGS
-    acc.deposit(2000.0)
-    acc.interestEarned should be (3.0)
-  }
-
-  it should "calculate correct interest for Maxi Savings account < 1000" in {
-    val acc=Account.MAXI_SAVINGS
-    acc.deposit(100.0)
-    acc.interestEarned should be (2.0)
-  }
-
-  it should "calculate correct interest for Maxi Savings account == 1000" in {
-    val acc=Account.MAXI_SAVINGS
-    acc.deposit(1000.0)
-    acc.interestEarned should be (20.0)
-  }
-
-  it should "calculate correct interest for Maxi Savings account >1000 and < 2000" in {
-    val acc=Account.MAXI_SAVINGS
-    acc.deposit(1100.0)
-    acc.interestEarned should be (25.0)
-  }
-
-  it should "calculate correct interest for Maxi Savings account ==2000" in {
-    val acc=Account.MAXI_SAVINGS
-    acc.deposit(2000.0)
-    acc.interestEarned should be (70.0)
-  }
-
-  it should "calculate correct interest for Maxi Savings account >2000" in {
-    val acc=Account.MAXI_SAVINGS
-    acc.deposit(3000.0)
-    acc.interestEarned should be (170.0)
-  }
-
-  it should "hold correct balance for concurrent withdraw operations" in {
+  ignore should "hold correct balance for concurrent withdraw operations" in {
     val acc=Account.CHECKING
     acc.deposit(10000.0)
     var count:Int=0

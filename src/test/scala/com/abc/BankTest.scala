@@ -1,51 +1,57 @@
 package com.abc
 
+import com.abc.report.BankReportGenerator
 import org.joda.time.DateTime
 import org.scalatest.{Matchers, FlatSpec}
 
 class BankTest extends FlatSpec with Matchers {
 
-  "Bank" should "customer summary" in {
+  "Bank" should "should print customer summary" in {
     val bank: Bank = new Bank
-    var john: Customer = new Customer("John").openAccount(Account.CHECKING)
+    val john: Customer = new Customer("John").openAccount(Account.CHECKING)
     bank.addCustomer(john)
-    bank.customerSummary should be("Customer Summary\n - John (1 account)")
+    val g=new BankReportGenerator
+    g.summary(bank) should be("Customer Summary\n - John (1 account)")
   }
 
   it should "checking account" in {
     val bank: Bank = new Bank
-    trait MockDateProvider extends AccountDateProvider {
+    trait MockTransactionStore extends InMemoryTransactionStore  {
       this:Account=>
-      def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
+      override def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
     }
     val checkingAccount: Account =new Account with CheckingInterestEarner
-      with CheckingName with MockDateProvider
-
+      with CheckingName with MockTransactionStore
     val bill: Customer = new Customer("Bill").openAccount(checkingAccount)
     bank.addCustomer(bill)
-    checkingAccount.deposit(100.0)
-    bank.totalInterestPaid should be(0.1)
+    checkingAccount.deposit(1000.0)
+    bank.totalInterestPaid should be(0.01)
   }
 
   it should "savings account" in {
     val bank: Bank = new Bank
-    trait MockDateProvider extends AccountDateProvider {
+    trait MockTransactionStore extends InMemoryTransactionStore  {
       this:Account=>
-      def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
+      override def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
     }
     val savingsAccount: Account =new Account with SavingsInterestEarner
-      with SavingsName with MockDateProvider
+      with SavingsName with MockTransactionStore
     bank.addCustomer(new Customer("Bill").openAccount(savingsAccount))
-    savingsAccount.deposit(1500.0)
-    bank.totalInterestPaid should be(2.0)
+    savingsAccount.deposit(2000.0)
+    bank.totalInterestPaid should be(4.0)
   }
 
   it should "maxi savings account" in {
     val bank: Bank = new Bank
-    val checkingAccount: Account = Account.MAXI_SAVINGS
+    trait MockTransactionStore extends InMemoryTransactionStore {
+      this:Account=>
+      override def currentDate:DateTime=DateProvider.getInstance.now.minusDays(360)
+    }
+    val checkingAccount: Account =new Account with MaxiSavingsInterestEarner
+      with MaxiSavingsName with MockTransactionStore
     bank.addCustomer(new Customer("Bill").openAccount(checkingAccount))
-    checkingAccount.deposit(3000.0)
-    bank.totalInterestPaid should be(170.0)
+    checkingAccount.deposit(100.0)
+    bank.totalInterestPaid should be(5.0)
   }
 
 }

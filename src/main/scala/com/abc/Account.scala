@@ -9,11 +9,11 @@ import scala.collection.mutable.ListBuffer
  */
 object Account {
   def CHECKING: Account = new Account with CheckingInterestEarner with CheckingName
-    with InMemoryTransactionStore with TransactionDateProvider
+    with InMemoryTransactionStore
   def SAVINGS: Account = new Account with SavingsInterestEarner with SavingsName
-    with InMemoryTransactionStore with TransactionDateProvider
+    with InMemoryTransactionStore
   def MAXI_SAVINGS: Account = new Account with MaxiSavingsInterestEarner with MaxiSavingsName
-    with InMemoryTransactionStore with TransactionDateProvider
+    with InMemoryTransactionStore
 }
 
 /**

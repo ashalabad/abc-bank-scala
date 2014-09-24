@@ -14,7 +14,7 @@ case class Transaction( val transactionDate:DateTime, val amount: Double)
 
 trait TransactionStore {
   this:Account=>
-  def currentDate:DateTime
+  def currentDate:DateTime=DateProvider.getInstance.now
 }
 
 /**
@@ -22,16 +22,11 @@ trait TransactionStore {
  */
 trait InMemoryTransactionStore extends TransactionStore {
   this:Account=>
-  private val _transactions:ListBuffer[Transaction]=new ListBuffer[Transaction]
+  private val _transactions:ListBuffer[Transaction]=ListBuffer[Transaction]()
   def transactions:Iterable[Transaction] = _transactions.toIterable
   def addTransaction(amount:Double):Transaction={
     val trx=Transaction(currentDate,amount)
     _transactions+=trx
     trx
   }
-}
-
-trait TransactionDateProvider {
-  this:TransactionStore=>
-  def currentDate=DateProvider.getInstance.now
 }

@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 /**
  * Created by igor on 9/21/14.
  */
-class MaxiSavingInterestCalculationRuleTest extends FlatSpec with Matchers {
+class MaxiSavingsInterestCalculationRuleTest extends FlatSpec with Matchers {
   import com.abc.ext.Helpers._
   "MaxiSaving Interest Calculator Rule" should "accumulate 5% interest rate for single transaction of 360 days" in {
     val rule=new MaxiSavingsInterestCalculator()

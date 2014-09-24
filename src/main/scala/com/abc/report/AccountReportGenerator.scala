@@ -1,9 +1,11 @@
-package com.abc
+package com.abc.report
+
+import com.abc.{Account, Transaction}
 
 /**
  * Account Statement Generator
  */
-class AccountStatementGenerator {
+class AccountReportGenerator {
   import com.abc.ext.Helpers._
   /**
    * Generate an account statement
