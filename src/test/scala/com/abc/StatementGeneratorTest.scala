@@ -6,15 +6,7 @@ import org.scalatest.{Matchers, FlatSpec}
  * Created by igor on 9/22/14.
  */
 class StatementGeneratorTest extends FlatSpec with Matchers{
-  import com.abc.ext.Helpers._
-  it should "format correct dollars amount" in {
-    10.25.toDollars should be("$10.25")
-    1.002123.toDollars should be("$1.00")
-  }
-  it should "pluralize correctly" in {
-    1.pluralize("item") should be("1 item")
-    2.pluralize("item") should be("2 items")
-  }
+
   it should "generate correct statement for checking account" in {
     val checkingAccount: Account =Account.CHECKING
     checkingAccount.deposit(100.0)

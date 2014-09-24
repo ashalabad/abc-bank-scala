@@ -8,40 +8,35 @@ import scala.collection.mutable.ListBuffer
  * Account Builder
  */
 object Account {
-  def CHECKING: Account = new Account with CheckingInterestEarner with CheckingName with ConcreteDateProvider
-  def SAVINGS: Account = new Account with SavingsInterestEarner with SavingsName with ConcreteDateProvider
-  def MAXI_SAVINGS: Account = new Account with MaxiSavingsInterestEarner with MaxiSavingsName with ConcreteDateProvider
+  def CHECKING: Account = new Account with CheckingInterestEarner with CheckingName
+    with InMemoryTransactionStore with TransactionDateProvider
+  def SAVINGS: Account = new Account with SavingsInterestEarner with SavingsName
+    with InMemoryTransactionStore with TransactionDateProvider
+  def MAXI_SAVINGS: Account = new Account with MaxiSavingsInterestEarner with MaxiSavingsName
+    with InMemoryTransactionStore with TransactionDateProvider
 }
 
 /**
  * Abstract Account class
- * Account Builder assembles an account with an interest earner,name and transaction date generator
- * @param _transactions
  */
-abstract class Account(private val _transactions: ListBuffer[Transaction] = ListBuffer()) {
-
+abstract class Account {
+  import com.abc.ext.Helpers._
   def name:String
-  def transactions:Iterable[Transaction]=_transactions.toIterable
+  def transactions:Iterable[Transaction]
 
   def deposit(amount: Double):Transaction={
-    if (amount <= 0)
-      throw new IllegalArgumentException("amount must be greater than zero")
-    val trx=Transaction(currentDate, amount)
-    _transactions += trx
-    trx
+    amount.positive()
+    addTransaction(amount)
   }
 
   def withdraw(amount: Double):Transaction={
-    if (amount <= 0)
-      throw new IllegalArgumentException("amount must be greater than zero")
+    amount.positive()
     if(sumTransactions(true)<amount)
-      throw new IllegalArgumentException("not enough funds")
-    val trx=Transaction(currentDate,-amount)
-    _transactions += trx
-    trx
+      throw new IllegalArgumentException("insufficient funds")
+    addTransaction(-amount)
   }
   def balance:Double=sumTransactions(true)
-  protected def currentDate:DateTime
   def interestEarned: Double
-  def sumTransactions(checkAllTransactions: Boolean = true): Double = _transactions.map(_.amount).sum
+  def sumTransactions(checkAllTransactions: Boolean = true): Double = transactions.map(_.amount).sum
+  protected def addTransaction(amount:Double):Transaction
 }

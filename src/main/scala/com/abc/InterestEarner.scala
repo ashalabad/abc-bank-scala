@@ -26,7 +26,7 @@ trait CheckingInterestEarner extends InterestEarner {
  */
 trait SavingsInterestEarner extends InterestEarner {
   this:Account=>
-  override def calculator: InterestCalculationRule = new SavingsInterestCalculator(0.001,0.002)
+  override def calculator: InterestCalculationRule = new SavingsInterestCalculator()
 }
 
 /**
@@ -34,5 +34,5 @@ trait SavingsInterestEarner extends InterestEarner {
  */
 trait MaxiSavingsInterestEarner extends InterestEarner {
   this:Account=>
-  override def calculator: InterestCalculationRule = new MaxiSavingsInterestCalculator(0.001,0.05)
+  override def calculator: InterestCalculationRule = new MaxiSavingsInterestCalculator()
 }
